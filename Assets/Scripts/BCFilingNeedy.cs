@@ -296,4 +296,51 @@ public class BCFilingNeedy : MonoBehaviour {
             }
         }
     }
+
+    //twitch plays
+    #pragma warning disable 414
+    private readonly string TwitchHelpMessage = @"!{0} 123456 [Selects the module names from top to bottom]";
+    #pragma warning restore 414
+    IEnumerator ProcessTwitchCommand(string command)
+    {
+        command = command.Replace(" ", "");
+        for (int i = 0; i < command.Length; i++)
+        {
+            if (!command[i].EqualsAny('1', '2', '3', '4', '5', '6'))
+            {
+                yield return "sendtochaterror!f What the heck is '" + command[i] + "' supposed to mean?";
+                yield break;
+            }
+        }
+        if (isEnded)
+        {
+            yield return "sendtochaterror The module is not currently active!";
+            yield break;
+        }
+        yield return null;
+        for (int i = 0; i < command.Length; i++)
+        {
+            Selectable.Children[int.Parse(command[i].ToString()) - 1].OnInteract();
+            yield return new WaitForSeconds(.1f);
+        }
+    }
+
+    void TwitchHandleForcedSolve()
+    {
+        StartCoroutine(HandleAutosolve());
+    }
+
+    IEnumerator HandleAutosolve()
+    {
+        while (true)
+        {
+            while (isEnded) yield return null;
+            int start = waitingFor;
+            for (int i = start; i < 6; i++)
+            {
+                Selectable.Children[sortedIndexes[i]].OnInteract();
+                yield return new WaitForSeconds(.1f);
+            }
+        }
+    }
 }
